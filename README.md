@@ -1,5 +1,7 @@
 # Ant Colony
 
+![Ant Colony Simulator](screenshots/v1.png)
+
 A real-time 2D ant colony foraging simulator built with HTML5 Canvas. Watch ants discover food sources, lay pheromone trails, and collectively optimize foraging paths — an emergent behavior arising from simple individual rules.
 
 ## How It Works
