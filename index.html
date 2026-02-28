@@ -42,6 +42,102 @@
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
+    transition: transform 0.25s ease, opacity 0.2s ease;
+    z-index: 10;
+  }
+
+  #sidebar.collapsed {
+    transform: translateX(-100%);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #sidebar-toggle {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 20;
+    width: 36px;
+    height: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--accent);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    line-height: 1;
+  }
+
+  #sidebar-toggle:hover {
+    border-color: var(--accent);
+    background: var(--surface-raised);
+  }
+
+  /* When sidebar is open, position toggle inside it */
+  #sidebar:not(.collapsed) ~ #canvas-wrap #sidebar-toggle,
+  body:not(.sidebar-collapsed) #sidebar-toggle {
+    left: 244px;
+  }
+
+  body.sidebar-collapsed #sidebar-toggle {
+    left: 10px;
+  }
+
+  @media (max-width: 768px) {
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      min-width: 280px;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+    }
+
+    #sidebar.collapsed {
+      transform: translateX(-100%);
+    }
+
+    body:not(.sidebar-collapsed) #sidebar-toggle {
+      left: 244px;
+    }
+
+    body.sidebar-collapsed #sidebar-toggle {
+      left: 10px;
+    }
+
+    #canvas-wrap {
+      width: 100% !important;
+    }
+
+    /* Overlay behind sidebar on mobile */
+    #sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 5;
+    }
+
+    body:not(.sidebar-collapsed) #sidebar-overlay {
+      display: block;
+    }
+  }
+
+  @media (min-width: 769px) {
+    #sidebar-overlay {
+      display: none !important;
+    }
   }
 
   #sidebar h1 {
@@ -183,7 +279,7 @@
   #tooltip {
     position: absolute;
     top: 12px;
-    left: 12px;
+    left: 54px;
     background: var(--surface);
     border: 1px solid var(--border);
     padding: 6px 10px;
@@ -202,10 +298,121 @@
     color: var(--text-dim);
     opacity: 0.6;
   }
+
+  #help-btn {
+    position: absolute;
+    top: 12px;
+    right: 70px;
+    width: 30px;
+    height: 30px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--text-dim);
+    font-family: 'Bitter', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 5;
+  }
+
+  #help-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--surface-raised);
+  }
+
+  #help-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #help-modal-overlay.open {
+    display: flex;
+  }
+
+  #help-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    max-width: 520px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 28px 28px 24px;
+    position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  #help-modal h2 {
+    font-family: 'Bitter', serif;
+    font-size: 1.15rem;
+    color: var(--accent);
+    margin-bottom: 16px;
+    letter-spacing: 0.01em;
+  }
+
+  #help-modal p {
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  #help-modal ol {
+    padding-left: 20px;
+    margin-bottom: 14px;
+  }
+
+  #help-modal li {
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  #help-modal li strong {
+    color: var(--accent);
+  }
+
+  #help-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+
+  #help-modal-close:hover {
+    color: var(--text);
+    background: var(--surface-raised);
+  }
 </style>
 </head>
 <body>
 
+<button id="sidebar-toggle" aria-label="Toggle sidebar">&#9776;</button>
+<div id="sidebar-overlay"></div>
 <div id="sidebar">
   <h1>Ant Colony</h1>
   <div class="subtitle">Pheromone Foraging Simulator</div>
@@ -276,6 +483,21 @@
   <canvas id="canvas"></canvas>
   <div id="tooltip">Click to place food</div>
   <div id="fps">-- fps</div>
+  <button id="help-btn" aria-label="How it works">?</button>
+</div>
+
+<div id="help-modal-overlay">
+  <div id="help-modal">
+    <button id="help-modal-close" aria-label="Close">&times;</button>
+    <h2>How It Works</h2>
+    <p>Each ant follows three simple rules:</p>
+    <ol>
+      <li><strong>Wander</strong> randomly until food or a pheromone trail is found</li>
+      <li><strong>Pick up food</strong> and turn back toward the colony</li>
+      <li><strong>Deposit pheromones</strong> along the return path so others can follow</li>
+    </ol>
+    <p>Pheromones <strong>decay</strong> over time and <strong>diffuse</strong> into neighboring cells. Shorter paths accumulate stronger trails because ants traverse them faster, reinforcing the signal before it fades. The colony converges on optimal routes without any central coordination.</p>
+  </div>
 </div>
 
 <script>
@@ -799,6 +1021,50 @@ canvas.addEventListener('mousemove', (e) => {
 canvas.addEventListener('mouseup', () => { mouseDown = false; });
 canvas.addEventListener('mouseleave', () => { mouseDown = false; });
 
+// Touch support for canvas
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  mouseDown = true;
+  const touch = e.touches[0];
+  handleTool({ clientX: touch.clientX, clientY: touch.clientY });
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  if (!mouseDown) return;
+  const touch = e.touches[0];
+  if (activeTool === 'obstacle' || activeTool === 'erase') {
+    handleTool({ clientX: touch.clientX, clientY: touch.clientY });
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchend', () => { mouseDown = false; });
+
+// ──────────────────────────────────────────────
+// SIDEBAR TOGGLE
+// ──────────────────────────────────────────────
+const sidebarEl = document.getElementById('sidebar');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+function toggleSidebar() {
+  const collapsed = sidebarEl.classList.toggle('collapsed');
+  document.body.classList.toggle('sidebar-collapsed', collapsed);
+  sidebarToggle.innerHTML = collapsed ? '&#9776;' : '&#10005;';
+  // Trigger canvas resize after transition
+  setTimeout(() => { resize(); }, 260);
+}
+
+sidebarToggle.addEventListener('click', toggleSidebar);
+sidebarOverlay.addEventListener('click', toggleSidebar);
+
+// Auto-collapse on small screens
+if (window.innerWidth <= 768) {
+  sidebarEl.classList.add('collapsed');
+  document.body.classList.add('sidebar-collapsed');
+  sidebarToggle.innerHTML = '&#9776;';
+}
+
 function handleTool(e) {
   const rect = canvas.getBoundingClientRect();
   const x = (e.clientX - rect.left) * (canvas.width / rect.width);
@@ -861,6 +1127,23 @@ function handleTool(e) {
     }
   }
 }
+
+// ──────────────────────────────────────────────
+// HELP MODAL
+// ──────────────────────────────────────────────
+const helpOverlay = document.getElementById('help-modal-overlay');
+
+document.getElementById('help-btn').addEventListener('click', () => {
+  helpOverlay.classList.add('open');
+});
+
+document.getElementById('help-modal-close').addEventListener('click', () => {
+  helpOverlay.classList.remove('open');
+});
+
+helpOverlay.addEventListener('click', (e) => {
+  if (e.target === helpOverlay) helpOverlay.classList.remove('open');
+});
 </script>
 </body>
 </html>
