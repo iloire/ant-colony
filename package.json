@@ -1,0 +1,9 @@
+{
+  "name": "ant-colony",
+  "version": "1.0.0",
+  "description": "Ant colony foraging simulator with pheromone trails",
+  "scripts": {
+    "dev": "npx serve -l 3000",
+    "start": "npx serve -l 3000"
+  }
+}
